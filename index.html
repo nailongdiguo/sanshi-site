@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三式浑象 · 万物皆数，万数皆形</title>
+<style>
+:root{--bg:#070b1a;--fg:#e2e8f0;--dim:#8fa3b8;--gold:#f0c27f;--coral:#e74c3c;--teal:#00d2ff;--purple:#a855f7;--line:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;overflow-x:hidden;line-height:1.7}
+canvas#starfield{position:fixed;inset:0;z-index:-1;pointer-events:none}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.grad-gold{background:linear-gradient(135deg,#f0c27f,#e74c3c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.grad-teal{background:linear-gradient(135deg,#00d2ff,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+nav{position:sticky;top:0;z-index:50;background:rgba(7,11,26,.82);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+nav .brand{font-weight:900;letter-spacing:.02em;font-size:15px;white-space:nowrap}
+nav .links{display:flex;gap:11px;font-size:12px;color:var(--dim);white-space:nowrap}
+nav .links a:hover{color:var(--gold)}
+header{min-height:86vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:70px 20px 40px}
+header .tag{font-size:12.5px;letter-spacing:.35em;color:var(--dim);margin-bottom:18px}
+header h1{font-size:clamp(38px,9vw,76px);font-weight:900;letter-spacing:.06em;line-height:1.15}
+header .sub{margin-top:16px;font-size:clamp(14px,3.4vw,19px);color:#c7d3e2;letter-spacing:.12em}
+header .desc{margin-top:22px;max-width:640px;color:var(--dim);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:34px auto 0;max-width:560px;width:100%}
+.stat{padding:14px 22px;border-radius:14px;text-align:center}
+.stat b{display:block;font-size:26px;font-weight:900}
+.stat span{font-size:11.5px;color:var(--dim);letter-spacing:.16em}
+.hint{margin-top:46px;font-size:12px;color:#5b6b80;animation:bob 2.2s infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+section{padding:70px 0}
+.sec-head{margin-bottom:30px}
+.sec-head .no{font-size:12px;letter-spacing:.3em;color:var(--coral)}
+.sec-head h2{font-size:clamp(24px,5.2vw,38px);font-weight:900;margin-top:6px}
+.sec-head p{color:var(--dim);margin-top:10px;font-size:14px;max-width:720px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{padding:22px}
+.card h3{font-size:17px;margin-bottom:8px}
+.card p{color:var(--dim);font-size:13.5px}
+.card .k{font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px;display:block}
+.tabs{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;font-size:13.5px;color:var(--dim);transition:.25s}
+.tab.on{background:linear-gradient(135deg,rgba(240,194,127,.22),rgba(231,76,60,.22));color:#fff;border-color:rgba(240,194,127,.5)}
+.panel{display:none;padding:24px}
+.panel.on{display:block;animation:fade .35s}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.spec div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.spec .l{font-size:11px;color:var(--dim);letter-spacing:.14em}
+.spec .v{font-size:15px;font-weight:700;margin-top:4px}
+.btn{display:inline-block;padding:11px 22px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--coral));color:#1a1206;font-weight:800;font-size:14px;border:0;cursor:pointer;transition:.25s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(231,76,60,.3)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.finding{display:grid;gap:12px}
+.f-item{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;cursor:pointer;transition:.25s}
+.f-item:hover{border-color:rgba(240,194,127,.35);transform:translateX(4px)}
+.f-item .n{font-weight:900;color:var(--coral);font-size:18px;min-width:34px}
+.f-item .t{font-size:14.5px;font-weight:700}
+.f-item .d{font-size:13px;color:var(--dim);margin-top:4px;display:none}
+.f-item.open .d{display:block}
+.tool{padding:22px}
+.tool input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:15px;outline:none}
+.tool input:focus{border-color:rgba(240,194,127,.6)}
+.tool .out{margin-top:16px;font-size:13.5px;color:var(--dim);min-height:52px}
+.tool .out b{color:var(--gold)}
+.dl{display:grid;gap:14px}
+.dl-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 20px;flex-wrap:wrap}
+.dl-item .meta{font-size:12px;color:var(--dim);margin-top:4px}
+.dl-item .name{font-weight:800;font-size:15.5px}
+.lock{padding:26px;text-align:center}
+.lock p{color:var(--dim);font-size:13.5px;margin-bottom:14px}
+.lock input{width:100%;max-width:320px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:15px;text-align:center;letter-spacing:.2em;outline:none}
+.lock .err{color:#ff6b6b;font-size:13px;margin-top:10px;min-height:18px}
+.hidden{display:none!important}
+footer{padding:50px 0 70px;text-align:center;color:#5b6b80;font-size:12.5px;border-top:1px solid rgba(255,255,255,.05);margin-top:40px}
+.reveal{opacity:0;transform:translateY(36px);transition:.8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<nav><div class="wrap">
+  <div class="brand grad-gold">三式浑象</div>
+  <div class="links">
+    <a href="#about">体系</a><a href="#pkg">安装包</a><a href="#doc">文档</a><a href="#site">站点</a><a href="#turing">图灵</a><a href="#ccru">CCRU</a><a href="#dl">下载</a>
+  </div>
+</div></nav>
+
+<header>
+  <div class="tag">S A N   S H I   H U N   X I A N G</div>
+  <h1 class="grad-gold">三式浑象</h1>
+  <div class="sub">万 物 皆 数 &nbsp;·&nbsp; 万 数 皆 形</div>
+  <p class="desc">一套以中国传统「三式」推演体系为骨、以浑天星象为形的推演工具集。
+  手机端与电脑版双端发布，配套学术长文《从拉马努金到十大门类》，以及交互式专题站点。</p>
+  <div class="stats">
+    <div class="stat glass"><b class="grad-teal">2</b><span>安装包</span></div>
+    <div class="stat glass"><b class="grad-teal">1</b><span>研究文档</span></div>
+    <div class="stat glass"><b class="grad-teal">1</b><span>专题站点</span></div>
+    <div class="stat glass"><b class="grad-teal">432</b><span>编码锚点</span></div>
+  </div>
+  <div class="hint">↓ 向下滚动</div>
+</header>
+
+<section id="about"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 1</span><h2 class="grad-gold">何为「三式浑象」</h2>
+  <p>三式为六壬、奇门、太乙三科，浑象取浑天之说——以天球坐标定位时空，将历法、星度与推演参数统一在一张星图上。</p></div>
+  <div class="grid3">
+    <div class="card glass reveal"><span class="k">S T R U C T U R E</span><h3>三式同源</h3><p>六壬重日时、奇门重方位、太乙重年计，三者共享同一套干支历与星度基准，可在同一界面交叉验证。</p></div>
+    <div class="card glass reveal"><span class="k">S P H E R E</span><h3>浑象定位</h3><p>以浑天坐标系呈现黄道、赤道与二十八宿，把抽象的干支关系落到可视的星空几何上。</p></div>
+    <div class="card glass reveal"><span class="k">N U M B E R</span><h3>数理内核</h3><p>底层以 432 为核心锚点组织周期与比例，与配套长文中的「数字网络」互为表里。</p></div>
+  </div>
+</div></section>
+
+<section id="pkg"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 2</span><h2 class="grad-gold">双端安装包</h2>
+  <p>同一套推演内核，分别适配手机与桌面两种使用场景。</p></div>
+  <div class="tabs reveal">
+    <div class="tab on" data-tab="m">手机端</div>
+    <div class="tab" data-tab="d">电脑版</div>
+  </div>
+  <div class="panel glass on" id="panel-m">
+    <h3 class="grad-teal">三式浑象 · 手机端</h3>
+    <div class="spec">
+      <div><div class="l">平台</div><div class="v">Android</div></div>
+      <div><div class="l">包体</div><div class="v">约 40 MB</div></div>
+      <div><div class="l">形态</div><div class="v">随身速查</div></div>
+      <div><div class="l">场景</div><div class="v">移动端排盘</div></div>
+    </div>
+    <p style="color:var(--dim);font-size:13.5px">面向随身使用：单手操作、快速起盘、星图随设备陀螺仪联动。适合外出行走、临时推演与课堂演示。</p>
+    <div style="margin-top:18px"><a class="btn" href="#dl">前往下载</a></div>
+  </div>
+  <div class="panel glass" id="panel-d">
+    <h3 class="grad-teal">三式浑象 · 电脑版</h3>
+    <div class="spec">
+      <div><div class="l">平台</div><div class="v">Windows</div></div>
+      <div><div class="l">包体</div><div class="v">约 146 MB</div></div>
+      <div><div class="l">形态</div><div class="v">全屏浑象</div></div>
+      <div><div class="l">场景</div><div class="v">深度推演 / 教学</div></div>
+    </div>
+    <p style="color:var(--dim);font-size:13.5px">面向桌面深度使用：大屏浑象、多盘同屏对照、批量导出与打印。适合系统研究、讲学与长期记录。</p>
+    <div style="margin-top:18px"><a class="btn" href="#dl">前往下载</a></div>
+  </div>
+</div></section>
+
+<section id="doc"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 3</span><h2 class="grad-gold">《从拉马努金到十大门类》</h2>
+  <p>从拉马努金的直觉数学出发，经 Dirac 大数假说与行星–常数对应，抵达十天干十大门类的编码框架。点开下面每一条，看核心结论。</p></div>
+  <div class="finding reveal">
+    <div class="f-item glass"><div class="n">01</div><div><div class="t">6π⁵ ≈ m<sub>p</sub>/m<sub>e</sub>（误差 0.002%）</div><div class="d">纯数学构造与质子电子质量比的六位小数级吻合，是全文置信度最高的对应，被列为“极高”层级。</div></div></div>
+    <div class="f-item glass"><div class="n">02</div><div><div class="t">地球公转周期 T ≈ (8/3)·α⁻¹（误差 0.047%）</div><div class="d">行星序号 8/3 与精细结构常数倒数的组合，三重独立验证，被列为“高”层级。</div></div></div>
+    <div class="f-item glass"><div class="n">03</div><div><div class="t">432/π ≈ 1/α（误差 0.34%）</div><div class="d">432 作为印度 Yuga 体系的核心数字，同时锚定 α、c、岁差与地球直径，构成“一源多汇”的编码网络。</div></div></div>
+    <div class="f-item glass"><div class="n">04</div><div><div class="t">十天干十大门类：五对“相差不大”</div><div class="d">甲乙→木星、丙丁→火星、戊己→土星、庚辛→金星、壬癸→水星+海王星；每对常数在尾数或首两位上彼此呼应。</div></div></div>
+    <div class="f-item glass"><div class="n">05</div><div><div class="t">方法论：置信度五维分层</div><div class="d">数值精度 30%、独立验证 25%、统计显著性 20%、理论一致性 15%、可证伪性 10%，把“感觉像”变成可评分。</div></div></div>
+    <div class="f-item glass"><div class="n">06</div><div><div class="t">公开的自我质疑</div><div class="d">文中专设“选择偏差”与“事后命名”章节，明确标注北斗七星–Dirac 大数等低置信度材料，作为对照。</div></div></div>
+  </div>
+
+  <div class="tool glass reveal" style="margin-top:22px">
+    <h3 style="font-size:16px;margin-bottom:6px">交互 · 数字锚定器</h3>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:14px">输入任意一个数，看看它落在 432 网络的哪一层。</p>
+    <input id="num" type="number" placeholder="例如 137.036 或 1836.15" step="any">
+    <div class="out" id="numout">等待输入…</div>
+  </div>
+</div></section>
+
+<section id="site"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 4</span><h2 class="grad-gold">专题站点《万物皆数，万数皆形》</h2>
+  <p>与长文配套的交互式网页：星空背景、玻璃卡片、滚动叙事，把论文里的数字表格变成可浏览的视觉长卷。</p></div>
+  <div class="glass reveal" style="padding:24px">
+    <div class="grid3">
+      <div><div class="k" style="font-size:11px;letter-spacing:.2em;color:var(--gold)">V I S U A L</div><p style="color:var(--dim);font-size:13.5px;margin-top:6px">Tailwind + ECharts 驱动的暗色叙事页</p></div>
+      <div><div class="k" style="font-size:11px;letter-spacing:.2em;color:var(--gold)">S T R U C T U R E</div><p style="color:var(--dim);font-size:13.5px;margin-top:6px">7 个章节：从拉马努金到十大门类</p></div>
+      <div><div class="k" style="font-size:11px;letter-spacing:.2em;color:var(--gold)">I N T E R A C T</div><p style="color:var(--dim);font-size:13.5px;margin-top:6px">滚入动画、星野背景、图表联动</p></div>
+    </div>
+    <div style="margin-top:20px"><a class="btn ghost" href="#dl">在下载区获取源文件</a></div>
+  </div>
+</div></section>
+
+<section id="turing"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 5</span><h2 class="grad-teal">图灵的凝视：意识可以被计算吗</h2>
+  <p>1950 年，图灵在《计算机器与智能》里把“机器能思考吗”换成了一个可操作的问题：如果一台机器在对话中无法被分辨，我们凭什么否认它在思考？</p></div>
+
+  <div class="grid3">
+    <div class="card glass reveal"><span class="k">1 9 3 6</span><h3>可计算数</h3><p>图灵机把“计算”还原为有限状态的机械动作。从此，<b>数不仅可被书写，还可被机器执行</b>——形式获得了时间。</p></div>
+    <div class="card glass reveal"><span class="k">1 9 5 0</span><h3>模仿游戏</h3><p>他说：与其定义意识，不如定义“不可区分”。这是把形而上学问题第一次交给一场可复现的实验。</p></div>
+    <div class="card glass reveal"><span class="k">O T H E R   M I N D S</span><h3>他心问题</h3><p>我们从不直接接触他人的意识，只接触其符号输出。图灵只是把这个日常事实推到了机器身上。</p></div>
+  </div>
+
+  <div class="tool glass reveal" style="margin-top:20px">
+    <h3 style="font-size:16px;margin-bottom:6px">交互 · 一段文字，两种读法</h3>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:14px">同一段话，你可以把它读作“人的自省”，也可以读作“机器的输出”。切换视角，看看差别在哪。</p>
+    <div class="tabs" style="margin:0 0 14px">
+      <div class="tab on" data-v="human">读作人类</div>
+      <div class="tab" data-v="machine">读作机器</div>
+    </div>
+    <div id="vtext" style="min-height:96px;font-size:14px;line-height:1.9;color:#cfdae8"></div>
+  </div>
+
+  <div class="glass reveal" style="padding:22px;margin-top:18px">
+    <p style="font-size:14px;color:#c7d3e2">本项目的长文从拉马努金的“梦中公式”出发，追问数字是否先于世界；图灵的问题则从另一端逼近：<b class="grad-gold">如果世界是数的投影，意识是否也只是某种运算的不动点？</b>
+    “万物皆数”在机器这里，变成了“万物皆可编码”；而可编码之物，未必可被理解——这正是图灵测试留下的裂缝。</p>
+  </div>
+</div></section>
+
+<section id="ccru"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 6</span><h2 class="grad-teal">CCRU：赛博文化的负熵</h2>
+  <p>Cybernetic Culture Research Unit，1995—2003 年活跃于华威大学，以 Nick Land、Sadie Plant 为代表。它把控制论、非线性数学与形而上学搅在一起，写下了一批介于论文与小说之间的“理论虚构”。</p></div>
+
+  <div class="grid3">
+    <div class="card glass reveal"><span class="k">C Y B E R N E T I C S</span><h3>正反馈伦理</h3><p>CCRU 关心的不是稳态，而是 runaway：让系统跑向失控的临界点。稳定被视作停滞，加速才是认识世界的方式。</p></div>
+    <div class="card glass reveal"><span class="k">T E L E O P L E X Y</span><h3>目的性的自催化</h3><p>Land 造词 teleoplexy：目的性像资本一样自我增殖、自我加速，最终不再需要任何外部目的。</p></div>
+    <div class="card glass reveal"><span class="k">H Y P E R S T I T I O N</span><h3>超级迷信</h3><p>虚构若被足够多的人当真，就会反过来实现自己——一种以叙事为因果的实验。</p></div>
+  </div>
+
+  <div class="tool glass reveal" style="margin-top:20px">
+    <h3 style="font-size:16px;margin-bottom:6px">交互 · 正反馈加速器</h3>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:10px">拖动滑块，看同一套正反馈在“稳态”与“失控”之间如何分岔。</p>
+    <input id="gain" type="range" min="80" max="260" value="120" style="width:100%">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dim)"><span>增益 0.8</span><span id="gainv">1.20</span><span>2.6</span></div>
+    <canvas id="fbcanvas" height="160" style="width:100%;margin-top:10px"></canvas>
+  </div>
+
+  <div class="glass reveal" style="padding:22px;margin-top:18px">
+    <p style="font-size:14px;color:#c7d3e2">三式推演把时间看作可循环、可回推的；CCRU 把时间看作单向加速、不可逆的。
+    两种时间观在这套站里并置：<b class="grad-gold">一边是浑象上重复的星度，一边是反馈中不可返回的指数</b>。
+    而“虚数”在两处都出现了——一处是命理中的象，一处是控制论里的相位。</p>
+  </div>
+</div></section>
+
+<section id="dl"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">0 7</span><h2 class="grad-gold">下载中心</h2>
+  <p>这是页面预览版：文件尚未上线。正式下载在部署后由 <b>http://152.175.242.90/</b> 提供，密码 <b>xyn1314520</b>。</p></div>
+
+  <div class="lock glass reveal" id="lock" style="display:none">
+    <p>🔒 请输入下载密码 / Enter access password</p>
+    <input id="pw" type="password" placeholder="••••••••" autocomplete="off">
+    <div class="err" id="err"></div>
+    <div style="margin-top:14px"><button class="btn" id="unlock">解锁下载</button></div>
+  </div>
+
+  <div class="dl hidden" id="list">
+    <div class="dl-item glass"><div><div class="name">三式浑象 · 手机端</div><div class="meta">Android · 约 40 MB · .rar</div></div><a class="btn" data-file="app-mobile.rar" href="#">下载</a></div>
+    <div class="dl-item glass"><div><div class="name">三式浑象 · 电脑版</div><div class="meta">Windows · 约 146 MB · .rar</div></div><a class="btn" data-file="app-desktop.rar" href="#">下载</a></div>
+    <div class="dl-item glass"><div><div class="name">从拉马努金到十大门类（完善版）</div><div class="meta">Word 文档 · 约 126 KB · .docx</div></div><a class="btn" data-file="doc.docx" href="#">下载</a></div>
+    <div class="dl-item glass"><div><div class="name">万物皆数，万数皆形（专题站点）</div><div class="meta">单文件网页 · 约 50 KB · .html</div></div><a class="btn" data-file="site.html" href="#">下载</a></div>
+  </div>
+</div></section>
+
+<section id="coda"><div class="wrap">
+  <div class="sec-head reveal"><span class="no">尾 声</span><h2 class="grad-gold">数、形与意识</h2></div>
+  <div class="glass reveal" style="padding:26px">
+    <p style="font-size:14.5px;line-height:2;color:#cfdae8">
+    从拉马努金在梦中接住公式，到 Dirac 相信大数之间必有秩序；从图灵把思考变成一场可判别的游戏，到 CCRU 相信叙事能反噬现实——这条线索看似松散，却共享同一个冲动：<b>相信表象之下有结构</b>。<br><br>
+    三式浑象把这种冲动落成工具：星图上每一次起局，都是一次“结构是否成立”的赌注。而本套文档所做的，是把这些赌注摊开，逐条标注置信度：哪些是六位小数级的确凿，哪些只是事后命名的巧合。<br><br>
+    <b class="grad-gold">也许最终没有答案。</b>但把这些数字、图形与论证并列在一起，本身就构成了一次诚实的追问——在能计算与能理解之间，在循环与加速之间，在人类的直觉与机器的输出之间，我们究竟站在哪一侧。
+    </p>
+  </div>
+</div></section>
+<footer>
+  <div class="wrap">
+    三式浑象 · 展示站 ｜ 数据与文本版权归原作者所有<br>
+    <span style="opacity:.6">Generated for presentation. No affiliation with any organisation.</span>
+  </div>
+</footer>
+
+<script>
+// 星空
+(function(){
+  var c=document.getElementById('starfield'),x=c.getContext('2d'),stars=[];
+  function size(){c.width=innerWidth;c.height=innerHeight;stars=[];
+    var n=Math.min(160,Math.floor(innerWidth*innerHeight/9000));
+    for(var i=0;i<n;i++)stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+.3,a:Math.random(),s:Math.random()*.02+.004});}
+  size();addEventListener('resize',size);
+  (function loop(){x.clearRect(0,0,c.width,c.height);
+    for(var i=0;i<stars.length;i++){var s=stars[i];s.a+=s.s;if(s.a>1||s.a<0)s.s=-s.s;
+      x.beginPath();x.arc(s.x,s.y,s.r,0,6.283);x.fillStyle='rgba(255,255,255,'+(0.25+0.6*Math.abs(s.a))+')';x.fill();}
+    requestAnimationFrame(loop);})();
+})();
+
+// 滚动显现
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+// 标签页
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+    document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('on');});
+    t.classList.add('on');document.getElementById('panel-'+t.dataset.tab).classList.add('on');
+  };
+});
+
+// 结论展开
+document.querySelectorAll('.f-item').forEach(function(it){
+  it.onclick=function(){it.classList.toggle('open');};
+});
+
+// 数字锚定器
+document.getElementById('num').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value),out=document.getElementById('numout');
+  if(isNaN(v)){out.textContent='等待输入…';return;}
+  var rows=[];
+  function add(name,val){var d=Math.abs(val-v)/v*100;rows.push(name+': '+'<b>'+val.toFixed(6).replace(/0+$/,'')+'</b> （偏差 '+d.toFixed(2)+'%）');}
+  add('432 / π',432/Math.PI);
+  add('432²',184896);
+  add('432 × 60',25920);
+  add('432 + 360',792);
+  add('8/3 × 137.036',(8/3)*137.036);
+  add('6π⁵',6*Math.pow(Math.PI,5));
+  out.innerHTML=rows.join('<br>');
+});
+
+// 下载解锁（密码只作为 key 参数提交给服务器校验）
+var pw=document.getElementById('pw'),err=document.getElementById('err');
+document.getElementById('unlock').onclick=function(){
+  var k=pw.value.trim();
+  if(!k){err.textContent='请输入密码';return;}
+  var a=document.createElement('a');
+  a.href='files/__probe.txt?key='+encodeURIComponent(k);
+  fetch(a.href,{method:'GET'}).then(function(r){
+    if(r.status===200||r.status===404){
+      err.textContent='';
+      document.getElementById('lock').classList.add('hidden');
+      var list=document.getElementById('list');list.classList.remove('hidden');
+      list.querySelectorAll('a[data-file]').forEach(function(l){
+        l.href='files/'+l.dataset.file+'?key='+encodeURIComponent(k);
+      });
+    }else{err.textContent='密码不正确 / Wrong password';}
+  }).catch(function(){err.textContent='网络错误，请重试';});
+};
+
+// 图灵视角切换
+(function(){
+  var T={
+    human:"我想了很久，才决定把这句话写下来。它未必正确，但它确实是我此刻的想法——包括犹豫的部分。",
+    machine:"本输出基于概率最高的 token 序列生成；它未必正确，但在统计上最接近期望的回应，且不含犹豫。"
+  };
+  var box=document.getElementById('vtext');
+  if(!box) return;
+  function set(v){box.textContent=T[v]||'';}
+  set('human');
+  document.querySelectorAll('.tab[data-v]').forEach(function(t){
+    t.onclick=function(){
+      document.querySelectorAll('.tab[data-v]').forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); set(t.dataset.v);
+    };
+  });
+})();
+
+// 正反馈曲线
+(function(){
+  var cv=document.getElementById('fbcanvas'); if(!cv) return;
+  var g=document.getElementById('gain'), lab=document.getElementById('gainv');
+  function draw(){
+    var gain=parseInt(g.value)/100;
+    lab.textContent=gain.toFixed(2);
+    var w=cv.width=cv.clientWidth*2, h=cv.height=320;
+    var ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,w,h);
+    // 网格
+    ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+    for(var i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,h*i/5);ctx.lineTo(w,h*i/5);ctx.stroke();}
+    // 线性参考
+    ctx.strokeStyle='rgba(0,210,255,.35)';ctx.beginPath();
+    ctx.moveTo(0,h-10);ctx.lineTo(w,h*0.55);ctx.stroke();
+    // 反馈曲线
+    var pts=[],v=1;
+    for(var k=0;k<120;k++){v=v*gain*0.98;if(v>1e6)v=1e6;pts.push(v);}
+    var mx=Math.max.apply(null,pts);
+    ctx.beginPath();
+    for(var j=0;j<pts.length;j++){
+      var x=w*j/(pts.length-1), y=h-10-(h-20)*(pts[j]/mx);
+      j?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    var grad=ctx.createLinearGradient(0,0,w,0);
+    grad.addColorStop(0,'#00d2ff');grad.addColorStop(1,gain>1.5?'#ff4d3d':'#f0c27f');
+    ctx.strokeStyle=grad;ctx.lineWidth=3;ctx.stroke();
+    // 状态
+    ctx.font='28px sans-serif';ctx.fillStyle='rgba(226,232,240,.85)';
+    var tag=gain<1.05?'稳态 / steady':(gain<1.5?'临界 / critical':'失控 / runaway');
+    ctx.fillText(tag,20,44);
+  }
+  g.oninput=draw; draw(); addEventListener('resize',draw);
+})();
+</script>
+</body>
+</html>
